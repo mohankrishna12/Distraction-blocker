@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Focus Timer with Distraction Blocker</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 2rem;
+    text-align: center;
+  }
+  h1 {
+    color: #2c3e50;
+  }
+  #timer {
+    font-size: 6rem;
+    margin: 2rem 0;
+    color: #304ffe;
+  }
+  button {
+    padding: 1rem 2rem;
+    margin: 0 1rem;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #304ffe;
+    color: white;
+  }
+  button:hover {
+    background-color: #1a35d1;
+  }
+  #blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(48, 79, 254, 0.95);
+    color: white;
+    font-size: 3rem;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Focus Timer with Distraction Blocker</h1>
+<div id="timer">25:00</div>
+<button id="startBtn">Start</button>
+<button id="pauseBtn" disabled>Pause</button>
+<button id="resetBtn">Reset</button>
+
+<div id="blocker">Focus Time! No distractions.</div>
+
+<script>
+  const timerElement = document.getElementById('timer');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const blocker = document.getElementById('blocker');
+
+  let focusDuration = 25 * 60; // 25 minutes in seconds
+  let breakDuration = 5 * 60;  // 5 minutes break
+  let timer = focusDuration;
+  let timerInterval = null;
+  let isFocusTime = true;
+  let isRunning = false;
+
+  function updateDisplay() {
+    let minutes = Math.floor(timer / 60);
+    let seconds = timer % 60;
+    timerElement.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+  }
+
+  function startTimer() {
+    if (isRunning) return;
+    isRunning = true;
+    startBtn.disabled = true;
+    pauseBtn.disabled = false;
+    blocker.style.display = isFocusTime ? 'flex' : 'none'; // show blocker only during focus
+
+    timerInterval = setInterval(() => {
+      timer--;
+      updateDisplay();
+      if (timer <= 0) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        isFocusTime = !isFocusTime;
+        timer = isFocusTime ? focusDuration : breakDuration;
+        alert(isFocusTime ? "Focus session started! Stay on task." : "Break time! Relax and recharge.");
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        blocker.style.display = isFocusTime ? 'flex' : 'none';
+        updateDisplay();
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    if (!isRunning) return;
+    clearInterval(timerInterval);
+    isRunning = false;
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    blocker.style.display = 'none';
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    isRunning = false;
+    isFocusTime = true;
+    timer = focusDuration;
+    updateDisplay();
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    blocker.style.display = 'none';
+  }
+
+  startBtn.addEventListener('click', startTimer);
+  pauseBtn.addEventListener('click', pauseTimer);
+  resetBtn.addEventListener('click', resetTimer);
+
+  updateDisplay();
+</script>
+
+</body>
+</html>
